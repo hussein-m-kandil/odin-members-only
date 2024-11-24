@@ -1,0 +1,52 @@
+{
+  "name": "odin-members-only",
+  "version": "1.0.0",
+  "description": "An exclusive clubhouse where members' posts are anonymous to the public, built as part of The Odin Project's Node.js course.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "node --env-file=.env --watch index.js",
+    "lint": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hussein-m-kandil/odin-members-only.git"
+  },
+  "keywords": [
+    "javascript",
+    "node",
+    "back-end",
+    "express",
+    "passport",
+    "postgresql",
+    "sql",
+    "ejs",
+    "web",
+    "development"
+  ],
+  "author": "Hussein Kandil",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hussein-m-kandil/odin-members-only/issues"
+  },
+  "homepage": "https://github.com/hussein-m-kandil/odin-members-only#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "@stylistic/eslint-plugin-js": "^2.11.0",
+    "eslint": "^9.15.0",
+    "globals": "^15.12.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "connect-pg-simple": "^10.0.0",
+    "date-fns": "^4.1.0",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "express-validator": "^7.2.0",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "pg": "^8.13.1"
+  }
+}

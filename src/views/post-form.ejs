@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/meta', { title }) %>
+  </head>
+  <body>
+    <%- include('partials/navbar') %>
+    <div class="container mt-4" style="max-width: 480px">
+      <h2 class="mb-4"><%= title %></h2>
+      <form method="post">
+        <div class="form-floating mb-3">
+          <% const titleErr = locals.validationErrors?.title %>
+          <input
+            type="text"
+            class="form-control<%- titleErr ? ' is-invalid' : '' %>"
+            name="title"
+            id="title"
+            autocomplete="on"
+            placeholder="Enter Title"
+            value="<%= locals.formData ? formData.title : '' %>"
+            autofocus
+          />
+          <label for="title">Enter Title</label>
+          <% if (titleErr) { %>
+          <div class="invalid-feedback"><%= titleErr.msg %></div>
+          <% } %>
+        </div>
+        <div class="form-floating mb-3">
+          <% const bodyErr = locals.validationErrors?.body %>
+          <textarea
+            class="form-control<%- bodyErr ? ' is-invalid' : '' %>"
+            name="body"
+            id="body"
+            placeholder="Enter Body"
+            style="min-height: 10rem"
+          >
+<%= locals.formData?.body %></textarea
+          >
+          <label for="body">Enter Body</label>
+          <% if (bodyErr) { %>
+          <div class="invalid-feedback"><%= bodyErr.msg %></div>
+          <% } %>
+        </div>
+        <div class="text-end">
+          <button type="submit" class="btn btn-outline-dark btn-lg">
+            <%= title %>
+          </button>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

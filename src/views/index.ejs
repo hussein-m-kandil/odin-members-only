@@ -6,16 +6,32 @@
   <body>
     <%- include('partials/navbar') %>
     <div class="container mt-4" style="max-width: 480px">
-      <h2 class="mb-5 text-center">Posts</h2>
+      <h2 class="mb-4 text-center">Posts</h2>
       <% if (posts.length > 0) { %> <% posts.forEach((post) => { %>
-      <div class="card mb-4" style="min-height: 200px">
+      <div class="card mb-4">
         <div class="card-body">
           <h3 class="card-title fs-5 text-center border-bottom pb-2 mb-3">
-            <cite class="source-title"><%= post.title %></cite>
+            <cite class="source-title">
+              <a
+                style="text-decoration: none; color: inherit; font: inherit"
+                href="/posts/<%= post.id %>"
+                ><%= post.title %></a
+              >
+            </cite>
           </h3>
           <figure class="mb-0">
-            <blockquote class="blockquote">
-              <p class="card-text"><%= post.post %></p>
+            <blockquote class="blockquote" style="min-height: 4rem">
+              <% if (locals.fullPost || post.body.length <= 80) { %>
+              <p class="card-text"><%= post.body %></p>
+              <% } else { %>
+              <p class="card-text">
+                <%= post.body.slice(0, 80) %><a
+                  class="link-secondary link-offset-1 link-underline-opacity-25 link-underline-opacity-100-hover fs-6"
+                  href="/posts/<%= post.id %>"
+                  >...See more</a
+                >
+              </p>
+              <% } %>
             </blockquote>
             <figcaption class="blockquote-footer mt-4 mb-2">
               <%= post.user.fullname %>
@@ -23,9 +39,9 @@
           </figure>
         </div>
         <div class="card-footer d-flex flex-wrap justify-content-between">
-          <small class="text-body-secondary">
+          <small class="text-body-secondary fst-italic">
             <a
-              class="link-secondary link-offset-3 link-underline-opacity-25 link-underline-opacity-100-hover"
+              class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
               href="/user/<%= post.user.id %>"
               ><%= post.user.username %></a
             >

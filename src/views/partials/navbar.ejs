@@ -18,7 +18,7 @@
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
         <li class="nav-item">
           <a
-            class="nav-link<%- url === '/' ? ' active' : '' %>"
+            class="nav-link<%- url === '/' || url === '/posts' ? ' active' : '' %>"
             aria-current="page"
             href="/"
           >
@@ -26,7 +26,7 @@
           </a>
         </li>
         <% if (locals.user) { %>
-        <li class="nav-item">
+        <li class="nav-item fst-italic">
           <a
             class="nav-link<%- url === ('/user/' + user.id) ? ' active' : '' %>"
             aria-current="page"
@@ -35,7 +35,16 @@
             <%= user.username %>
           </a>
         </li>
-        <li class="nav-item mt-5 mt-lg-0 ms-lg-5">
+        <li class="nav-item">
+          <a
+            class="nav-link<%- url === '/posts/add' ? ' active' : '' %>"
+            aria-current="page"
+            href="/posts/add"
+          >
+            Add Post
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="/logout">Logout</a>
         </li>
         <% } else { %>

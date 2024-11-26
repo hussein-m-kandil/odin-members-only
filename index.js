@@ -1,6 +1,7 @@
 const path = require('path');
 const express = require('express');
 const { formatDistance } = require('date-fns');
+const userRouter = require('./src/routes/user-router.js');
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const VIEWS_DIR = path.join(__dirname, 'src/views');
@@ -58,6 +59,8 @@ app.get('/', (req, res) => {
   };
   res.render('index', { title: 'Odin Members Only', posts, humanizeDate });
 });
+
+app.use('/user', userRouter);
 
 if (!process.env.SERVERLESS_FUNCTION) {
   const PORT = process.env.PORT || 3000;

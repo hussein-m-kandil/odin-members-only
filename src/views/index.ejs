@@ -5,19 +5,30 @@
   </head>
   <body>
     <%- include('partials/navbar') %>
-    <div class="container mt-5" style="max-width: 480px">
+    <div class="container mt-4" style="max-width: 480px">
       <h2 class="mb-5 text-center">Posts</h2>
-      <% if (posts.length > 0) { %> <%locals.posts?.forEach((post)=>{%>
+      <% if (posts.length > 0) { %> <% posts.forEach((post) => { %>
       <div class="card mb-4" style="min-height: 200px">
         <div class="card-body">
           <h3 class="card-title fs-5 text-center border-bottom pb-2 mb-3">
-            <%= post.title %>
+            <cite class="source-title"><%= post.title %></cite>
           </h3>
-          <p class="card-text"><%= post.post %></p>
+          <figure class="mb-0">
+            <blockquote class="blockquote">
+              <p class="card-text"><%= post.post %></p>
+            </blockquote>
+            <figcaption class="blockquote-footer mt-4 mb-2">
+              <%= post.user.fullname %>
+            </figcaption>
+          </figure>
         </div>
         <div class="card-footer d-flex flex-wrap justify-content-between">
           <small class="text-body-secondary">
-            By <%= post.user.fullname %>
+            <a
+              class="link-secondary link-offset-3 link-underline-opacity-25 link-underline-opacity-100-hover"
+              href="/user/<%= post.user.id %>"
+              ><%= post.user.username %></a
+            >
           </small>
           <small class="text-body-secondary">
             <%= humanizeDate(post.updated_at) %> ago

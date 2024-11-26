@@ -13,4 +13,6 @@ router
   .get(userController.getSignup)
   .post(userController.postSignup);
 
+router.get('/:id', userController.getUser);
+
 module.exports = router;

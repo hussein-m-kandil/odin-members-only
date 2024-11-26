@@ -1,4 +1,8 @@
 const { body, validationResult } = require('express-validator');
+const {
+  genMinLenErrMsg,
+  genMaxLenErrMsg,
+} = require('../utils/messages-generators.js');
 
 const MIN_LEN = 3;
 const MAX_LEN = 127;
@@ -7,14 +11,6 @@ const FULLNAME_MAX_LEN = 255;
 const SIGNUP_TITLE = 'Sign Up';
 const LOGIN_TITLE = 'Log In';
 const USER_FORM_VIEW = 'user-form';
-
-const genMinLenErrMsg = (prefix, min, suffix) => {
-  return `${prefix} must have at least ${min} ${suffix || 'characters'}`;
-};
-
-const genMaxLenErrMsg = (prefix, max, suffix) => {
-  return `${prefix} cannot have more than ${max} ${suffix || 'characters'}`;
-};
 
 const isEqualPasswords = (_, { req }) => {
   const { password, password_confirm } = req.body;
@@ -92,4 +88,11 @@ module.exports = {
       res.redirect('/');
     },
   ],
+
+  getUser: (req, res) => {
+    // TODO: Get user posts from DB
+    const { user, posts } = res.locals;
+    res.locals.posts = posts.filter((p) => p.user.id === user.id);
+    res.render('index', { title: user.username });
+  },
 };

@@ -21,25 +21,39 @@
             class="nav-link<%- url === '/' ? ' active' : '' %>"
             aria-current="page"
             href="/"
-            >Home</a
           >
+            Home
+          </a>
         </li>
         <% if (locals.user) { %>
-        <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
+        <li class="nav-item">
+          <a
+            class="nav-link<%- url === ('/user/' + user.id) ? ' active' : '' %>"
+            aria-current="page"
+            href="/user/<%= user.id %>"
+          >
+            <%= user.username %>
+          </a>
+        </li>
+        <li class="nav-item mt-5 mt-lg-0 ms-lg-5">
+          <a class="nav-link" href="/logout">Logout</a>
+        </li>
         <% } else { %>
         <li class="nav-item">
           <a
             class="nav-link<%- url === '/login' ? ' active' : '' %>"
             href="/user/login"
-            >Log In</a
           >
+            Log In
+          </a>
         </li>
         <li class="nav-item">
           <a
             class="nav-link<%- url === '/sign-up' ? ' active' : '' %>"
             href="/user/signup"
-            >Sign Up</a
           >
+            Sign Up
+          </a>
         </li>
         <% } %>
       </ul>

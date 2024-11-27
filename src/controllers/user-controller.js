@@ -3,11 +3,15 @@ const {
   genMinLenErrMsg,
   genMaxLenErrMsg,
 } = require('../utils/messages-generators.js');
+const db = require('../db/queries.js');
+const passport = require('passport');
+const bcrypt = require('bcryptjs');
+const AppGenericError = require('../errors/app-generic-error.js');
 
 const MIN_LEN = 3;
-const MAX_LEN = 127;
+const MAX_LEN = 50;
 const PASS_MIN_LEN = 8;
-const FULLNAME_MAX_LEN = 255;
+const FULLNAME_MAX_LEN = 100;
 const SIGNUP_TITLE = 'Sign Up';
 const LOGIN_TITLE = 'Log In';
 const USER_FORM_VIEW = 'user-form';
@@ -52,47 +56,73 @@ module.exports = {
     res.render(USER_FORM_VIEW, { title: LOGIN_TITLE });
   },
 
-  postLogin: [
-    (req, res) => {
-      const { username, password } = req.body;
-      // TODO: Check whether the given user data are belong to an already signed-up user
-      if (username !== 'hussein' || password !== '12312312') {
-        return res.status(400).render(USER_FORM_VIEW, {
-          title: LOGIN_TITLE,
-          error: 'Invalid Username or Password!',
-        });
+  postLogin: (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+      if (err) return next(err);
+      if (!user) {
+        return res
+          .status(404)
+          .render(USER_FORM_VIEW, { title: LOGIN_TITLE, error: info.message });
       }
-      res.redirect('/');
-    },
-  ],
+      // Pass the user to req.login(user, next), otherwise, the session won't gen updated
+      // https://github.com/jwalton/passport-api-docs?tab=readme-ov-file
+      req.login(user, () => res.redirect('/'));
+    })(req, res, next);
+  },
 
   getSignup: (req, res) => {
     res.render(USER_FORM_VIEW, { title: SIGNUP_TITLE });
   },
 
   postSignup: [
+    (req, res, next) => {
+      res.locals.title = SIGNUP_TITLE;
+      res.locals.formData = req.body;
+      next();
+    },
     ...signupValidators,
     (req, res, next) => {
       const validationErrors = validationResult(req);
       if (!validationErrors.isEmpty()) {
         return res.status(400).render(USER_FORM_VIEW, {
-          title: SIGNUP_TITLE,
           validationErrors: validationErrors.mapped(),
-          formData: req.body,
         });
       }
       next();
     },
     (req, res) => {
-      // TODO: Save the new user to the DB
-      res.redirect('/');
+      bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
+        res.locals.error = 'Sorry, we cannot sign you up! Try again later.';
+        if (err) {
+          return res.status(500).render(USER_FORM_VIEW);
+        }
+        db.createRow(
+          'users',
+          ['fullname', 'username', 'password'],
+          [req.body.fullname, req.body.username, hashedPassword]
+        )
+          .then(() => res.redirect('/'))
+          .catch((e) => {
+            if (e instanceof AppGenericError) {
+              res.locals.error = 'This username is already exists!';
+              return res.status(e.statusCode).render(USER_FORM_VIEW);
+            }
+            return res.status(500).render(USER_FORM_VIEW);
+          });
+      });
     },
   ],
 
-  getUser: (req, res) => {
-    // TODO: Get user posts from DB
-    const { user, posts } = res.locals;
-    res.locals.posts = posts.filter((p) => p.user.id === user.id);
-    res.render('index', { title: user.username });
+  getUser: (req, res, next) => {
+    if (!req.user) {
+      return res.redirect('/');
+    }
+    res.locals.title = req.user.username;
+    db.readPosts(['users.user_id'], [req.user.user_id])
+      .then((posts) => {
+        res.locals.posts = posts;
+        res.render('index');
+      })
+      .catch(() => next(new AppGenericError('Cannot get member page!', 500)));
   },
 };

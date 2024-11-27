@@ -2,11 +2,11 @@
   "name": "odin-members-only",
   "version": "1.0.0",
   "description": "An exclusive clubhouse where members' posts are anonymous to the public, built as part of The Odin Project's Node.js course.",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "dev": "node --env-file=.env --watch index.js",
+    "start": "node app.js",
+    "dev": "node --env-file=.env --watch app.js",
     "lint": "eslint ."
   },
   "repository": {

@@ -28,9 +28,9 @@
         <% if (locals.user) { %>
         <li class="nav-item fst-italic">
           <a
-            class="nav-link<%- url === ('/user/' + user.id) ? ' active' : '' %>"
+            class="nav-link<%- url === ('/user/' + user.user_id) ? ' active' : '' %>"
             aria-current="page"
-            href="/user/<%= user.id %>"
+            href="/user/<%= user.user_id %>"
           >
             <%= user.username %>
           </a>

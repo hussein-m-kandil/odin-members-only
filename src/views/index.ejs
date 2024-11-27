@@ -7,34 +7,35 @@
     <%- include('partials/navbar') %>
     <div class="container mt-4" style="max-width: 480px">
       <h2 class="mb-4 text-center">Posts</h2>
-      <% if (posts.length > 0) { %> <% posts.forEach((post) => { %>
+      <% if (posts.length > 0) { %>
+      <%posts.forEach(({username,fullname,user_id,post_id,post_title,post_body,updated_at})=>{%>
       <div class="card mb-4">
         <div class="card-body">
           <h3 class="card-title fs-5 text-center border-bottom pb-2 mb-3">
             <cite class="source-title">
               <a
                 style="text-decoration: none; color: inherit; font: inherit"
-                href="/posts/<%= post.id %>"
-                ><%= post.title %></a
+                href="/posts/<%= post_id %>"
+                ><%= post_title %></a
               >
             </cite>
           </h3>
           <figure class="mb-0">
             <blockquote class="blockquote" style="min-height: 4rem">
-              <% if (locals.fullPost || post.body.length <= 80) { %>
-              <p class="card-text"><%= post.body %></p>
+              <% if (locals.fullPost || post_body.length <= 80) { %>
+              <p class="card-text"><%= post_body %></p>
               <% } else { %>
               <p class="card-text">
-                <%= post.body.slice(0, 80) %><a
+                <%= post_body.slice(0, 80) %><a
                   class="link-secondary link-offset-1 link-underline-opacity-25 link-underline-opacity-100-hover fs-6"
-                  href="/posts/<%= post.id %>"
+                  href="/posts/<%= post_id %>"
                   >...See more</a
                 >
               </p>
               <% } %>
             </blockquote>
             <figcaption class="blockquote-footer mt-4 mb-2">
-              <%= post.user.fullname %>
+              <%= fullname %>
             </figcaption>
           </figure>
         </div>
@@ -42,12 +43,12 @@
           <small class="text-body-secondary fst-italic">
             <a
               class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
-              href="/user/<%= post.user.id %>"
-              ><%= post.user.username %></a
+              href="/user/<%= user_id %>"
+              ><%= username %></a
             >
           </small>
           <small class="text-body-secondary">
-            <%= humanizeDate(post.updated_at) %> ago
+            <%= humanizeDate(updated_at) %> ago
           </small>
         </div>
       </div>

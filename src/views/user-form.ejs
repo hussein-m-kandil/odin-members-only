@@ -2,38 +2,13 @@
 <html lang="en">
   <head>
     <%- include('partials/meta', { title }) %>
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const alert = document.getElementById('error-alert');
-        if (alert) {
-          alert.addEventListener('closed.bs.alert', () => {
-            var firstInput = document.getElementsByTagName('input')[0];
-            if (firstInput) firstInput.focus();
-          });
-        }
-      });
-    </script>
   </head>
   <body>
     <%- include('partials/navbar') %>
     <div class="container mt-4" style="max-width: 480px">
       <header>
+        <%- include('partials/alert') %>
         <h2 class="mb-4"><%= title %></h2>
-        <% if (locals.error) { %>
-        <div
-          id="error-alert"
-          class="alert alert-danger alert-dismissible fade show mb-4"
-          role="alert"
-        >
-          <p class="lead m-0"><%= error %></p>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="alert"
-            aria-label="Close this validation error"
-          ></button>
-        </div>
-        <% } %>
       </header>
       <form method="post">
         <div class="form-floating mb-3">

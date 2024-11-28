@@ -29,15 +29,14 @@ function authenticate(app) {
       (username, password, done) => {
         db.readRowByWhereClause('users', 'username', username)
           .then((user) => {
+            const message = 'Incorrect username or password';
             if (!user) {
-              return done(null, false, { message: 'Incorrect username' });
+              return done(null, false, { message });
             }
             bcrypt.compare(password, user.password, (err, match) => {
               if (err) return done(err);
               if (!match) {
-                return done(null, false, {
-                  message: 'Incorrect username or password.',
-                });
+                return done(null, false, { message });
               }
               return done(null, user);
             });

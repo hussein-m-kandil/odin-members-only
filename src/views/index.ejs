@@ -7,42 +7,62 @@
     <%- include('partials/navbar') %>
     <div class="container mt-4" style="max-width: 480px">
       <%- include('partials/alert') %>
-      <h2 class="mb-4 text-center">Posts</h2>
+      <% if (locals.userInfo) { %>
+        <h2 class="mb-4 text-center">
+        <%=`${userInfo.fullname}`%>
+        <span class="fs-6 align-middle text-secondary">
+          (<%=`${userInfo.username}`%>)
+        </span>
+        <% if (userInfo.is_admin) { %>
+          <br />
+          <span class="badge text-bg-success align-middle" style="font-size: 0.75rem">Admin</span>
+        <% } %>
+        <% if (locals.user && (user.is_admin || user.user_id === userInfo.user_id)) { %>
+          <br />
+          <%- include('partials/update-delete-form', {
+            updateUrl:`/user/update/${userInfo.user_id}`,
+            deleteUrl:`/user/delete/${userInfo.user_id}`,
+            itemName:`${user.user_id === userInfo.user_id ? 'your account' : userInfo.username}`
+          }) %>
+        <% } %>
+        </h2>
+      <% } else { %>
+        <h2 class="mb-4 text-center">Posts</h2>
+      <% } %>
       <% if (Array.isArray(locals.posts) && posts.length > 0) { %>
-      <%posts.forEach(({username,fullname,user_id,post_id,post_title,post_body,created_at,updated_at})=>{%>
+      <% posts.forEach(({ username, fullname, user_id,post_id, post_title, post_body, created_at, updated_at }) => { %>
       <div class="card mb-4">
         <div class="card-body">
-          <div
-            class="card-title border-bottom pb-2 mb-3 d-flex flex-wrap justify-content-between"
-          >
+          <div class="card-title border-bottom pb-2 mb-3 d-flex flex-wrap justify-content-between">
             <h3 class="fs-5 m-0 lh-base">
               <cite class="source-title">
-                <a
-                  style="text-decoration: none; color: inherit; font: inherit"
-                  href="/posts/<%= post_id %>"
-                >
+                <a style="text-decoration: none; color: inherit; font: inherit" href="/posts/<%= post_id %>">
                   <%= post_title %>
                 </a>
               </cite>
             </h3>
-            <% if (locals.user && user.user_id === user_id) { %>
-            <%-include('partials/update-delete-form', {
-            updateUrl:`/posts/update/${post_id}`,
-            deleteUrl:`/posts/delete/${post_id}`, itemName:`${post_title}` })%>
+            <% if (locals.user && (user.is_admin || user.user_id === user_id)) { %>
+              <%- include('partials/update-delete-form', {
+                updateUrl: `/posts/update/${post_id}`,
+                deleteUrl: `/posts/delete/${post_id}`,
+                itemName: `${post_title}`
+              }) %>
             <% } %>
           </div>
           <figure class="mb-0">
             <blockquote class="blockquote" style="min-height: 4rem">
               <% if (locals.fullPost || post_body.length <= 80) { %>
-              <p class="card-text"><%= post_body %></p>
+                <pre
+                  class="card-text"
+                  style="overflow-wrap: break-word; white-space: pre-wrap; font: inherit; font-size: 1rem;"
+                ><%= post_body %></pre>
               <% } else { %>
-              <p class="card-text">
-                <%= post_body.slice(0, 80) %><a
-                  class="link-secondary link-offset-1 link-underline-opacity-25 link-underline-opacity-100-hover fs-6"
-                  href="/posts/<%= post_id %>"
-                  >...See more</a
-                >
-              </p>
+                <p class="card-text">
+                  <%= post_body.slice(0, 80) %><a
+                    class="link-secondary link-offset-1 link-underline-opacity-25 link-underline-opacity-100-hover fs-6"
+                    href="/posts/<%= post_id %>"
+                    >...See more</a>
+                </p>
               <% } %>
             </blockquote>
             <figcaption class="blockquote-footer mt-4 mb-2">

@@ -1,4 +1,4 @@
-const { body, validationResult } = require('express-validator');
+const { body, param, validationResult } = require('express-validator');
 const {
   genMinLenErrMsg,
   genMaxLenErrMsg,
@@ -125,16 +125,34 @@ module.exports = {
     },
   ],
 
-  getUser: (req, res, next) => {
-    if (!req.user) {
-      return res.redirect('/');
-    }
-    res.locals.title = req.user.username;
-    db.readPosts(['users.user_id'], [req.user.user_id])
-      .then((posts) => {
-        res.locals.posts = posts;
+  getUser: [
+    param('id').isInt({ min: 0 }),
+    (req, res, next) => {
+      return validationResult(req).isEmpty() ? next() : next('route');
+    },
+    async (req, res, next) => {
+      try {
+        const posts = await db.readPosts(['users.user_id'], [req.params.id]);
+        if (!posts || posts.length === 0) {
+          const user = await db.readRowByWhereClause(
+            'users',
+            ['user_id'],
+            [req.params.id]
+          );
+          if (!user) {
+            throw new AppGenericError('No such a member!', 404);
+          }
+          res.locals.posts = [];
+          res.locals.title = user.username.toUpperCase();
+        } else {
+          res.locals.posts = posts;
+          res.locals.title = posts[0].username.toUpperCase();
+        }
         res.render('index');
-      })
-      .catch(() => next(new AppGenericError('Cannot get member page!', 500)));
-  },
+      } catch (error) {
+        if (error instanceof AppGenericError) return next(error);
+        next(new AppGenericError('Could not get the requested data!', 500));
+      }
+    },
+  ],
 };

@@ -6,8 +6,9 @@
   <body>
     <%- include('partials/navbar') %>
     <div class="container mt-4" style="max-width: 480px">
+      <%- include('partials/alert') %>
       <h2 class="mb-4 text-center">Posts</h2>
-      <% if (posts.length > 0) { %>
+      <% if (Array.isArray(locals.posts) && posts.length > 0) { %>
       <%posts.forEach(({username,fullname,user_id,post_id,post_title,post_body,updated_at})=>{%>
       <div class="card mb-4">
         <div class="card-body">

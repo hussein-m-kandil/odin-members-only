@@ -56,6 +56,8 @@ module.exports = {
 
   postLogin: (req, res, next) => {
     passport.authenticate('local', (error, user, info) => {
+      // 4th arg 'status' represent errors occurred before executing the verifier
+      // e.g. (..., info.message='Missing Credentials', status=400) => Empty username/password
       if (error) return next(error);
       if (!user) {
         return res

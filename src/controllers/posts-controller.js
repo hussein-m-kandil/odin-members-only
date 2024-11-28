@@ -10,8 +10,8 @@ const MIN_LEN = 3;
 const MAX_LEN = 255;
 const ADD_POST_TITLE = 'Add Post';
 const POST_FORM_VIEW = 'post-form';
-const NOT_FOUND_MSG = 'Could not get any posts! Try again later.';
-const NOT_SAVED_MSG = 'Could not save the post! Try again later.';
+const COULD_NOT_READ = 'Could not get the requested data! Try again later.';
+const COULD_NOT_CREATE = 'Could not save the given data! Try again later.';
 
 module.exports = {
   getPost: [
@@ -30,7 +30,7 @@ module.exports = {
             fullPost: true,
           });
         })
-        .catch(() => next(new AppGenericError(NOT_FOUND_MSG, 500)));
+        .catch(() => next(new AppGenericError(COULD_NOT_READ, 500)));
     },
   ],
 
@@ -40,7 +40,7 @@ module.exports = {
         if (!posts) return next('route');
         res.render('index', { title: 'Odin Members Only', posts });
       })
-      .catch(() => next(new AppGenericError(NOT_FOUND_MSG, 500)));
+      .catch(() => next(new AppGenericError(COULD_NOT_READ, 500)));
   },
 
   getCreatePost: (req, res) => {
@@ -78,7 +78,7 @@ module.exports = {
         [req.user.user_id, req.body.title, req.body.body]
       )
         .then(() => res.redirect('/'))
-        .catch(() => next(new AppGenericError(NOT_SAVED_MSG, 500)));
+        .catch(() => next(new AppGenericError(COULD_NOT_CREATE, 500)));
     },
   ],
 };

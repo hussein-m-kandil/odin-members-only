@@ -71,6 +71,16 @@ async function readAllRows(table, orderBy) {
   return (await queryDBCatchError(query)).rows;
 }
 
+function prepareWhereClauseValues(clauseValue) {
+  return Array.isArray(clauseValue) ? [...clauseValue] : [clauseValue];
+}
+
+function prepareWhereClauseString(clauseKey) {
+  const clauseKeys = Array.isArray(clauseKey) ? [...clauseKey] : [clauseKey];
+  const parameterizedClauses = clauseKeys.map((k, i) => ` ${k} = $${i + 1}`);
+  return ` WHERE ${parameterizedClauses.join(' AND ')}`;
+}
+
 /**
  * @param {string} table
  * @param {string | string[] | null} clauseKey
@@ -81,15 +91,21 @@ async function readAllRowsByWhereClause(
   table,
   clauseKey,
   clauseValue,
-  rowsLimit
+  rowsLimit,
+  orderByValue,
+  desc = false
 ) {
   let values = [];
   let text = 'SELECT * FROM ' + table;
   if (clauseKey && clauseValue) {
-    const clauseKeys = Array.isArray(clauseKey) ? [...clauseKey] : [clauseKey];
-    values = Array.isArray(clauseValue) ? [...clauseValue] : [clauseValue];
-    const parameterizedClauses = clauseKeys.map((k, i) => ` ${k} = $${i + 1}`);
-    text += ` WHERE ${parameterizedClauses.join(' AND ')}`;
+    text += prepareWhereClauseString(clauseKey);
+    values = prepareWhereClauseValues(clauseValue);
+  }
+  if (orderByValue) {
+    const orderBy = Array.isArray(orderByValue)
+      ? orderByValue.join()
+      : orderByValue;
+    text += ` ORDER BY ${orderBy} ${desc ? 'DESC' : 'ASC'}`;
   }
   text += rowsLimit ? ` LIMIT ${rowsLimit}` : '';
   return (await queryDBCatchError({ text, values })).rows;
@@ -100,9 +116,15 @@ async function readAllRowsByWhereClause(
  * @param {any | any[] | null} clauseValue
  * @param {number?} rowsLimit
  */
-async function readPosts(clauseKey, clauseValue, rowsLimit) {
+async function readPosts(
+  clauseKey,
+  clauseValue,
+  rowsLimit,
+  orderBy = 'updated_at',
+  desc = true
+) {
   const table = 'users JOIN posts ON users.user_id = posts.user_id';
-  const args = [table, clauseKey, clauseValue, rowsLimit];
+  const args = [table, clauseKey, clauseValue, rowsLimit, orderBy, desc];
   return await readAllRowsByWhereClause(...args);
 }
 
@@ -117,49 +139,49 @@ async function readRowByWhereClause(table, clauseKey, clauseValue) {
 
 /**
  * @param {string} table
- * @param {string} clauseKey
- * @param {number | string} clauseValue
- * @param {string | string[]} columns
- * @param {string | string[]} values
+ * @param {string | string[]} clauseKey
+ * @param {any | any[]} clauseValue
+ * @param {string | string[]} columnKey
+ * @param {string | string[]} columnValue
  */
 async function updateRowsByWhereClause(
   table,
   clauseKey,
   clauseValue,
-  columns,
-  values
+  columnKey,
+  columnValue
 ) {
-  let paramCount = 1;
+  const whereClause = prepareWhereClauseString(clauseKey);
+  const whereValues = prepareWhereClauseValues(clauseValue);
+  let paramCount = whereValues.length;
   const columnParamStrPairs = [];
-  if (Array.isArray(columns)) {
-    columns.forEach((c) => {
-      columnParamStrPairs.push(`${c} = $${paramCount++}`);
+  if (Array.isArray(columnKey)) {
+    columnKey.forEach((c) => {
+      columnParamStrPairs.push(`${c} = $${++paramCount}`);
     });
   } else {
-    columnParamStrPairs.push(`${columns} = $${paramCount++}`);
+    columnParamStrPairs.push(`${columnKey} = $${++paramCount}`);
   }
   const query = {
     text: `
          UPDATE ${table}
             SET ${columnParamStrPairs.join(', ')}
-          WHERE ${clauseKey} = $${paramCount}
+          ${whereClause}
       `,
-    values: Array.isArray(values)
-      ? values.concat(clauseValue)
-      : [values, clauseValue],
+    values: whereValues.concat(columnValue),
   };
   return await queryDBCatchError(query);
 }
 
 /**
  * @param {string} table
- * @param {string} clauseKey
- * @param {number | string} clauseValue
+ * @param {string | string[]} clauseKey
+ * @param {any | any[]} clauseValue
  */
 async function deleteRowsByWhereClause(table, clauseKey, clauseValue) {
   const query = {
-    text: `DELETE FROM ${table} WHERE ${clauseKey} = $1`,
-    values: [clauseValue],
+    text: `DELETE FROM ${table} ${prepareWhereClauseString(clauseKey)}`,
+    values: prepareWhereClauseValues(clauseValue),
   };
   return await queryDBCatchError(query);
 }

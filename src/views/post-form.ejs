@@ -10,34 +10,34 @@
       <h2 class="mb-4"><%= title %></h2>
       <form method="post">
         <div class="form-floating mb-3">
-          <% const titleErr = locals.validationErrors?.title %>
+          <% const titleErr = locals.validationErrors?.post_title %>
           <input
             type="text"
             class="form-control<%- titleErr ? ' is-invalid' : '' %>"
-            name="title"
-            id="title"
+            name="post_title"
+            id="post_title"
             autocomplete="on"
             placeholder="Enter Title"
-            value="<%= locals.formData ? formData.title : '' %>"
+            value="<%= locals.formData ? formData.post_title : '' %>"
             autofocus
           />
-          <label for="title">Enter Title</label>
+          <label for="post_title">Enter Title</label>
           <% if (titleErr) { %>
           <div class="invalid-feedback"><%= titleErr.msg %></div>
           <% } %>
         </div>
         <div class="form-floating mb-3">
-          <% const bodyErr = locals.validationErrors?.body %>
+          <% const bodyErr = locals.validationErrors?.post_body %>
           <textarea
             class="form-control<%- bodyErr ? ' is-invalid' : '' %>"
-            name="body"
-            id="body"
+            name="post_body"
+            id="post_body"
             placeholder="Enter Body"
             style="min-height: 10rem"
           >
-<%= locals.formData?.body %></textarea
+<%= locals.formData?.post_body %></textarea
           >
-          <label for="body">Enter Body</label>
+          <label for="post_body">Enter Body</label>
           <% if (bodyErr) { %>
           <div class="invalid-feedback"><%= bodyErr.msg %></div>
           <% } %>

@@ -1,6 +1,6 @@
 const path = require('path');
 const express = require('express');
-const { formatDistance } = require('date-fns');
+const { formatDistance, isSameSecond, isSameMinute } = require('date-fns');
 const userRouter = require('./src/routes/user-router.js');
 const postsRouter = require('./src/routes/posts-router.js');
 const authenticate = require('./src/auth/authenticate.js');
@@ -21,7 +21,9 @@ const injectUrlIntoLocals = (req, res, next) => {
   next();
 };
 
-const injectDateTimeHumanizerIntoLocals = (req, res, next) => {
+const injectDateUtilitiesIntoLocals = (req, res, next) => {
+  res.locals.isSameSecond = isSameSecond;
+  res.locals.isSameMinute = isSameMinute;
   res.locals.humanizeDate = (date) => formatDistance(new Date(), date);
   next();
 };
@@ -56,7 +58,7 @@ app.use(express.static(PUBLIC_DIR));
 app.use(logReq);
 app.use(injectUrlIntoLocals);
 app.use(injectUserIntoLocals);
-app.use(injectDateTimeHumanizerIntoLocals);
+app.use(injectDateUtilitiesIntoLocals);
 app.use(initFlashInSession);
 
 app.get('/', (req, res) => res.redirect('/posts'));

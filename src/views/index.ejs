@@ -9,18 +9,28 @@
       <%- include('partials/alert') %>
       <h2 class="mb-4 text-center">Posts</h2>
       <% if (Array.isArray(locals.posts) && posts.length > 0) { %>
-      <%posts.forEach(({username,fullname,user_id,post_id,post_title,post_body,updated_at})=>{%>
+      <%posts.forEach(({username,fullname,user_id,post_id,post_title,post_body,created_at,updated_at})=>{%>
       <div class="card mb-4">
         <div class="card-body">
-          <h3 class="card-title fs-5 text-center border-bottom pb-2 mb-3">
-            <cite class="source-title">
-              <a
-                style="text-decoration: none; color: inherit; font: inherit"
-                href="/posts/<%= post_id %>"
-                ><%= post_title %></a
-              >
-            </cite>
-          </h3>
+          <div
+            class="card-title border-bottom pb-2 mb-3 d-flex flex-wrap justify-content-between"
+          >
+            <h3 class="fs-5 m-0 lh-base">
+              <cite class="source-title">
+                <a
+                  style="text-decoration: none; color: inherit; font: inherit"
+                  href="/posts/<%= post_id %>"
+                >
+                  <%= post_title %>
+                </a>
+              </cite>
+            </h3>
+            <% if (locals.user && user.user_id === user_id) { %>
+            <%-include('partials/update-delete-form', {
+            updateUrl:`/posts/update/${post_id}`,
+            deleteUrl:`/posts/delete/${post_id}`, itemName:`${post_title}` })%>
+            <% } %>
+          </div>
           <figure class="mb-0">
             <blockquote class="blockquote" style="min-height: 4rem">
               <% if (locals.fullPost || post_body.length <= 80) { %>
@@ -49,7 +59,10 @@
             >
           </small>
           <small class="text-body-secondary">
-            <%= humanizeDate(updated_at) %> ago
+            <%= isSameSecond(created_at,
+            updated_at)||isSameMinute(created_at,updated_at) ?
+            `${humanizeDate(updated_at)} ago` : `Updated
+            ${humanizeDate(updated_at)} ago` %>
           </small>
         </div>
       </div>

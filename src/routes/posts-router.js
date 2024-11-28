@@ -12,6 +12,17 @@ router
   .get(postsController.getCreatePost)
   .post(postsController.postCreatePost);
 
+router
+  .route('/update/:id')
+  .all(authMiddlewares.preventUnauthenticatedOps)
+  .get(postsController.getUpdate)
+  .post(postsController.postUpdate);
+
+router
+  .route('/delete/:id')
+  .all(authMiddlewares.preventUnauthenticatedOps)
+  .post(postsController.postDelete);
+
 router.get('/:id', postsController.getPost);
 
 module.exports = router;

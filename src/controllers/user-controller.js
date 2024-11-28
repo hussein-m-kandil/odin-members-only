@@ -144,11 +144,15 @@ module.exports = {
           if (!user) {
             throw new AppGenericError('No such a member!', 404);
           }
+          user.password = undefined;
           res.locals.posts = [];
+          res.locals.userInfo = user;
           res.locals.title = user.username.toUpperCase();
         } else {
           res.locals.posts = posts;
+          const { user_id, username, fullname, is_admin } = posts[0];
           res.locals.title = posts[0].username.toUpperCase();
+          res.locals.userInfo = { user_id, username, fullname, is_admin };
         }
         res.render('index');
       } catch (error) {

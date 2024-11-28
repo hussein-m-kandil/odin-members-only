@@ -57,8 +57,8 @@ module.exports = {
   },
 
   postLogin: (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
-      if (err) return next(err);
+    passport.authenticate('local', (error, user, info) => {
+      if (error) return next(error);
       if (!user) {
         return res
           .status(404)
@@ -68,6 +68,20 @@ module.exports = {
       // https://github.com/jwalton/passport-api-docs?tab=readme-ov-file
       req.login(user, () => res.redirect('/'));
     })(req, res, next);
+  },
+
+  getLogout: (req, res, next) => {
+    req.logout((error) => {
+      if (error) {
+        console.log('This error has occurred in "req.logout"!\n', error);
+        const appError = new AppGenericError(
+          'Could not log you out! Try again later.',
+          500
+        );
+        return next(appError);
+      }
+      res.redirect('/');
+    });
   },
 
   getSignup: (req, res) => {

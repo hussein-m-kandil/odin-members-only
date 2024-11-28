@@ -45,10 +45,8 @@ const signupValidators = [
     .withMessage(genMinLenErrMsg('A full name', MIN_LEN, 'letters'))
     .isLength({ max: FULLNAME_MAX_LEN })
     .withMessage(genMaxLenErrMsg('A full name', FULLNAME_MAX_LEN, 'letters'))
-    .isAlpha(undefined, { ignore: '._ -' })
-    .withMessage(
-      'A full name can contain spaces, dots, hyphens, underscores, and letters'
-    ),
+    .isAlpha(undefined, { ignore: '._ -/()[]~' })
+    .withMessage('Not all special characters are allowed'),
 ];
 
 module.exports = {

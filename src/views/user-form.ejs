@@ -44,7 +44,7 @@
           <div class="invalid-feedback"><%= passwordErr.msg %></div>
           <% } %>
         </div>
-        <% if (url.endsWith('signup')) { %>
+        <% if (locals.fullForm) { %>
         <div class="form-floating mb-3">
           <%const passwordConfErr=locals.validationErrors?.password_confirm%>
           <input

@@ -129,12 +129,21 @@ module.exports = {
           req.body.username,
           hashedPassword,
         ];
-        if (req.body.secret === process.env.ADMIN_SECRET) {
+        const signedUpAsAdmin = req.body.secret === process.env.ADMIN_SECRET;
+        if (signedUpAsAdmin) {
           queryColumns.push('is_admin');
           queryValues.push('TRUE');
         }
         db.createRow('users', queryColumns, queryValues)
-          .then(() => res.redirect('/'))
+          .then(() => {
+            db.readRowByWhereClause('users', ['username'], [req.body.username])
+              .then((user) => req.login(user, () => res.redirect('/')))
+              .catch((e) => {
+                console.log('Error occurred in automatic login after sign up');
+                console.log(e);
+                res.redirect('/');
+              });
+          })
           .catch((e) => {
             if (e instanceof AppGenericError) {
               res.locals.error = 'This username is already exists!';

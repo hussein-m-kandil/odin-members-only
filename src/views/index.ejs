@@ -17,13 +17,20 @@
           <br />
           <span class="badge text-bg-success align-middle" style="font-size: 0.75rem">Admin</span>
         <% } %>
-        <% if (locals.user && (user.is_admin || user.user_id === userInfo.user_id)) { %>
+        <% if (locals.user) { %>
           <br />
-          <%- include('partials/update-delete-form', {
-            updateUrl:`/user/update/${userInfo.user_id}`,
-            deleteUrl:`/user/delete/${userInfo.user_id}`,
-            itemName:`${user.user_id === userInfo.user_id ? 'your account' : userInfo.username}`
-          }) %>
+          <% if (user.user_id === userInfo.user_id) { %>
+            <%- include('partials/update-delete-form', {
+              updateUrl: `/user/update/${userInfo.user_id}`,
+              deleteUrl: `/user/delete/${userInfo.user_id}`,
+              itemName: `${user.user_id === userInfo.user_id ? 'your account' : userInfo.username}`
+            }) %>
+          <% } else if (user.is_admin) { %>
+            <%- include('partials/update-delete-form', {
+              deleteUrl: `/user/delete/${userInfo.user_id}`,
+              itemName: `${user.user_id === userInfo.user_id ? 'your account' : userInfo.username}`
+            }) %>
+          <% } %>
         <% } %>
         </h2>
       <% } else { %>
@@ -41,16 +48,23 @@
                 </a>
               </cite>
             </h3>
-            <% if (locals.user && (user.is_admin || user.user_id === user_id)) { %>
-              <%- include('partials/update-delete-form', {
-                updateUrl: `/posts/update/${post_id}`,
-                deleteUrl: `/posts/delete/${post_id}`,
-                itemName: `${post_title}`
-              }) %>
+            <% if (locals.user) { %>
+              <% if (user.user_id === user_id) { %>
+                <%- include('partials/update-delete-form', {
+                  updateUrl: `/posts/update/${post_id}`,
+                  deleteUrl: `/posts/delete/${post_id}`,
+                  itemName: `${post_title}`
+                }) %>
+              <% } else if (user.is_admin) { %>
+                <%- include('partials/update-delete-form', {
+                  deleteUrl: `/posts/delete/${post_id}`,
+                  itemName: `${post_title}`
+                }) %>
+              <% } %>
             <% } %>
           </div>
           <figure class="mb-0">
-            <blockquote class="blockquote" style="min-height: 4rem">
+            <blockquote class="blockquote" <%- locals.user && 'style="min-height: 4rem"' %>>
               <% if (locals.fullPost || post_body.length <= 80) { %>
                 <pre
                   class="card-text"
@@ -65,26 +79,30 @@
                 </p>
               <% } %>
             </blockquote>
-            <figcaption class="blockquote-footer mt-4 mb-2">
-              <%= fullname %>
-            </figcaption>
+            <% if (locals.user) { %>
+              <figcaption class="blockquote-footer mt-4 mb-2">
+                <%= fullname %>
+              </figcaption>
+            <% } %>
           </figure>
         </div>
-        <div class="card-footer d-flex flex-wrap justify-content-between">
-          <small class="text-body-secondary fst-italic">
-            <a
-              class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
-              href="/user/<%= user_id %>"
-              ><%= username %></a
-            >
-          </small>
-          <small class="text-body-secondary">
-            <%= isSameSecond(created_at,
-            updated_at)||isSameMinute(created_at,updated_at) ?
-            `${humanizeDate(updated_at)} ago` : `Updated
-            ${humanizeDate(updated_at)} ago` %>
-          </small>
-        </div>
+        <% if (locals.user) { %>
+          <div class="card-footer d-flex flex-wrap justify-content-between">
+            <small class="text-body-secondary fst-italic">
+              <a
+                class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+                href="/user/<%= user_id %>"
+                ><%= username %></a
+              >
+            </small>
+            <small class="text-body-secondary">
+              <%= isSameSecond(created_at,
+              updated_at)||isSameMinute(created_at,updated_at) ?
+              `${humanizeDate(updated_at)} ago` : `Updated
+              ${humanizeDate(updated_at)} ago` %>
+            </small>
+          </div>
+        <% } %>
       </div>
       <%})%> <% } else { %>
       <p class="lead text-center">There are no posts yet!</p>

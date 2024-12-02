@@ -18,7 +18,7 @@
             class="form-control<%- usernameErr ? ' is-invalid' : '' %>"
             name="username"
             id="username"
-            autocomplete="on"
+            autocomplete="off"
             placeholder="Enter Username"
             value="<%= locals.formData ? formData.username : '' %>"
             autofocus
@@ -35,7 +35,7 @@
             class="form-control<%- passwordErr ? ' is-invalid' : '' %>"
             name="password"
             id="password"
-            autocomplete="on"
+            autocomplete="off"
             placeholder="Enter Password"
             value="<%= locals.formData ? formData.password : '' %>"
           />
@@ -52,7 +52,7 @@
             class="form-control<%- passwordConfErr ? ' is-invalid' : '' %>"
             name="password_confirm"
             id="password_confirm"
-            autocomplete="on"
+            autocomplete="off"
             placeholder="Confirm Password"
             value="<%= locals.formData ? formData.password_confirm : '' %>"
           />
@@ -68,13 +68,32 @@
             class="form-control<%- fullnameErr ? ' is-invalid' : '' %>"
             name="fullname"
             id="fullname"
-            autocomplete="on"
+            autocomplete="off"
             placeholder="Enter Full Name"
             value="<%= locals.formData ? formData.fullname : '' %>"
           />
           <label for="fullname">Enter Full Name</label>
           <% if (fullnameErr) { %>
           <div class="invalid-feedback"><%= fullnameErr.msg %></div>
+          <% } %>
+        </div>
+        <div class="form-floating mb-3">
+          <% const secretErr = locals.validationErrors?.secret %>
+          <input
+            type="text"
+            class="form-control<%- secretErr ? ' is-invalid' : '' %>"
+            name="secret"
+            id="secret"
+            autocomplete="off"
+            placeholder="Enter Admin Secret"
+            value="<%= locals.formData ? formData.secret : '' %>"
+          />
+          <label for="secret">Enter Admin Secret (optional)</label>
+          <div class="small text-muted px-1 my-1">
+            Hint: You may find the admin secret beside the source code.
+          </div>
+          <% if (secretErr) { %>
+          <div class="invalid-feedback"><%= secretErr.msg %></div>
           <% } %>
         </div>
         <% } %>

@@ -123,11 +123,17 @@ module.exports = {
         if (err) {
           return res.status(500).render(USER_FORM_VIEW);
         }
-        db.createRow(
-          'users',
-          ['fullname', 'username', 'password'],
-          [req.body.fullname, req.body.username, hashedPassword]
-        )
+        const queryColumns = ['fullname', 'username', 'password'];
+        const queryValues = [
+          req.body.fullname,
+          req.body.username,
+          hashedPassword,
+        ];
+        if (req.body.secret === process.env.ADMIN_SECRET) {
+          queryColumns.push('is_admin');
+          queryValues.push('TRUE');
+        }
+        db.createRow('users', queryColumns, queryValues)
           .then(() => res.redirect('/'))
           .catch((e) => {
             if (e instanceof AppGenericError) {
@@ -223,6 +229,10 @@ module.exports = {
         queryColumns.push('password');
         queryValues.push(res.locals.passwordHash);
       }
+      if (req.body.secret === process.env.ADMIN_SECRET) {
+        queryColumns.push('is_admin');
+        queryValues.push('TRUE');
+      }
       queryArgs.push(queryColumns, queryValues);
       db.updateRowsByWhereClause(...queryArgs)
         .then(() => res.redirect(`${req.baseUrl}/${req.params.id}`))
@@ -233,17 +243,26 @@ module.exports = {
   postDelete: [
     ...idValidators,
     (req, res, next) => {
-      if (!req.user || req.user.user_id !== Number(req.params.id)) {
+      if (
+        !req.user ||
+        (!req.user.is_admin && req.user.user_id !== Number(req.params.id))
+      ) {
         return next('route');
+      }
+      if (req.user.is_admin) {
+        return next();
       }
       req.logout((error) => {
         if (error) {
           return handleLogoutError(error, next);
         }
-        db.deleteRowsByWhereClause('users', ['user_id'], [req.params.id])
-          .then(() => res.redirect('/'))
-          .catch(next);
+        next();
       });
+    },
+    (req, res, next) => {
+      db.deleteRowsByWhereClause('users', ['user_id'], [req.params.id])
+        .then(() => res.redirect('/'))
+        .catch(next);
     },
   ],
 };

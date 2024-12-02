@@ -15,6 +15,13 @@ router
 
 router.get('/logout', userController.getLogout);
 
+router
+  .route('/update/:id')
+  .get(userController.getUpdate)
+  .post(userController.postUpdate);
+
+router.post('/delete/:id', userController.postDelete);
+
 router.get('/:id', userController.getUser);
 
 module.exports = router;

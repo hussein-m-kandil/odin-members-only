@@ -7,47 +7,73 @@ const db = require('../db/queries.js');
 const passport = require('passport');
 const bcrypt = require('bcryptjs');
 const AppGenericError = require('../errors/app-generic-error.js');
+const { idValidators } = require('../middlewares/validators.js');
 
+const SALT = 10;
 const MIN_LEN = 3;
 const MAX_LEN = 50;
 const PASS_MIN_LEN = 8;
 const FULLNAME_MAX_LEN = 100;
 const SIGNUP_TITLE = 'Sign Up';
+const UPDATE_TITLE = 'Edit Account';
 const LOGIN_TITLE = 'Log In';
 const USER_FORM_VIEW = 'user-form';
 
-const isEqualPasswords = (_, { req }) => {
-  const { password, password_confirm } = req.body;
-  if (password !== password_confirm) {
-    throw Error('Password confirmation does not match');
-  }
-  return true;
+const getUserFormValidators = (signup) => {
+  const isEqualPasswords = (_, { req }) => {
+    const { password, password_confirm } = req.body;
+    if (password !== password_confirm) {
+      throw Error('Password confirmation does not match');
+    }
+    return true;
+  };
+  const optionalOpts = signup ? false : { values: 'falsy' };
+  return [
+    body('username')
+      .isLength({ min: MIN_LEN })
+      .withMessage(genMinLenErrMsg('A username', MIN_LEN))
+      .isLength({ max: MAX_LEN })
+      .withMessage(genMaxLenErrMsg('A username', MAX_LEN))
+      .isAlphanumeric(undefined, { ignore: '._-' })
+      .withMessage(
+        'A username can contain dots, hyphens, underscores, letters, and numbers'
+      ),
+    body(['password', 'password_confirm'])
+      .optional(optionalOpts)
+      .isLength({ min: PASS_MIN_LEN })
+      .withMessage(genMinLenErrMsg('A password', PASS_MIN_LEN))
+      .isLength({ max: MAX_LEN })
+      .withMessage(genMaxLenErrMsg('A password', MAX_LEN)),
+    body(['password', 'password_confirm'])
+      .optional(optionalOpts)
+      .custom(isEqualPasswords),
+    body('fullname')
+      .isLength({ min: MIN_LEN })
+      .withMessage(genMinLenErrMsg('A full name', MIN_LEN, 'letters'))
+      .isLength({ max: FULLNAME_MAX_LEN })
+      .withMessage(genMaxLenErrMsg('A full name', FULLNAME_MAX_LEN, 'letters'))
+      .isAlpha(undefined, { ignore: '._ -/()[]~' })
+      .withMessage('Not all special characters are allowed'),
+    (req, res, next) => {
+      const validationErrors = validationResult(req);
+      if (!validationErrors.isEmpty()) {
+        return res.status(400).render(USER_FORM_VIEW, {
+          validationErrors: validationErrors.mapped(),
+        });
+      }
+      next();
+    },
+  ];
 };
 
-const signupValidators = [
-  body('username')
-    .isLength({ min: MIN_LEN })
-    .withMessage(genMinLenErrMsg('A username', MIN_LEN))
-    .isLength({ max: MAX_LEN })
-    .withMessage(genMaxLenErrMsg('A username', MAX_LEN))
-    .isAlphanumeric(undefined, { ignore: '._-' })
-    .withMessage(
-      'A username can contain dots, hyphens, underscores, letters, and numbers'
-    ),
-  body(['password', 'password_confirm'])
-    .isLength({ min: PASS_MIN_LEN })
-    .withMessage(genMinLenErrMsg('A password', PASS_MIN_LEN))
-    .isLength({ max: MAX_LEN })
-    .withMessage(genMaxLenErrMsg('A password', MAX_LEN)),
-  body(['password', 'password_confirm']).custom(isEqualPasswords),
-  body('fullname')
-    .isLength({ min: MIN_LEN })
-    .withMessage(genMinLenErrMsg('A full name', MIN_LEN, 'letters'))
-    .isLength({ max: FULLNAME_MAX_LEN })
-    .withMessage(genMaxLenErrMsg('A full name', FULLNAME_MAX_LEN, 'letters'))
-    .isAlpha(undefined, { ignore: '._ -/()[]~' })
-    .withMessage('Not all special characters are allowed'),
-];
+const handleLogoutError = (error, next) => {
+  console.log('This error has occurred in "req.logout"!\n', error);
+  const appError = new AppGenericError(
+    'Could not log you out! Try again later.',
+    500
+  );
+  return next(appError);
+};
 
 module.exports = {
   getLogin: (req, res) => {
@@ -73,39 +99,26 @@ module.exports = {
   getLogout: (req, res, next) => {
     req.logout((error) => {
       if (error) {
-        console.log('This error has occurred in "req.logout"!\n', error);
-        const appError = new AppGenericError(
-          'Could not log you out! Try again later.',
-          500
-        );
-        return next(appError);
+        return handleLogoutError(error, next);
       }
       res.redirect('/');
     });
   },
 
   getSignup: (req, res) => {
-    res.render(USER_FORM_VIEW, { title: SIGNUP_TITLE });
+    res.render(USER_FORM_VIEW, { title: SIGNUP_TITLE, fullForm: true });
   },
 
   postSignup: [
     (req, res, next) => {
       res.locals.title = SIGNUP_TITLE;
       res.locals.formData = req.body;
+      res.locals.fullForm = true;
       next();
     },
-    ...signupValidators,
-    (req, res, next) => {
-      const validationErrors = validationResult(req);
-      if (!validationErrors.isEmpty()) {
-        return res.status(400).render(USER_FORM_VIEW, {
-          validationErrors: validationErrors.mapped(),
-        });
-      }
-      next();
-    },
+    ...getUserFormValidators(true),
     (req, res) => {
-      bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
+      bcrypt.hash(req.body.password, SALT, async (err, hashedPassword) => {
         res.locals.error = 'Sorry, we cannot sign you up! Try again later.';
         if (err) {
           return res.status(500).render(USER_FORM_VIEW);
@@ -159,6 +172,78 @@ module.exports = {
         if (error instanceof AppGenericError) return next(error);
         next(new AppGenericError('Could not get the requested data!', 500));
       }
+    },
+  ],
+
+  getUpdate: [
+    ...idValidators,
+    (req, res, next) => {
+      if (!req.user || req.user.user_id !== Number(req.params.id)) {
+        return next('route');
+      }
+      db.readRowByWhereClause('users', ['user_id'], [req.params.id])
+        .then((user) => {
+          res.locals.formData = {
+            username: user.username,
+            fullname: user.fullname,
+          };
+          res.render(USER_FORM_VIEW, { title: UPDATE_TITLE, fullForm: true });
+        })
+        .catch(next);
+    },
+  ],
+
+  postUpdate: [
+    ...idValidators,
+    (req, res, next) => {
+      res.locals.title = UPDATE_TITLE;
+      res.locals.formData = req.body;
+      res.locals.fullForm = true;
+      next();
+    },
+    ...getUserFormValidators(false),
+    (req, res, next) => {
+      res.locals.error =
+        'Sorry, we cannot commit your updates! Try again later.';
+      if (!req.body.password) return next();
+      bcrypt.hash(req.body.password, SALT, async (err, passwordHash) => {
+        if (err) res.status(500).render(USER_FORM_VIEW);
+        res.locals.passwordHash = passwordHash;
+        next();
+      });
+    },
+    (req, res, next) => {
+      if (!req.user || req.user.user_id !== Number(req.params.id)) {
+        return next('route');
+      }
+      const queryArgs = ['users', ['user_id'], [req.params.id]];
+      const queryColumns = ['fullname', 'username'];
+      const queryValues = [req.body.fullname, req.body.username];
+      if (res.locals.passwordHash) {
+        queryColumns.push('password');
+        queryValues.push(res.locals.passwordHash);
+      }
+      queryArgs.push(queryColumns, queryValues);
+      db.updateRowsByWhereClause(...queryArgs)
+        .then(() => res.redirect(`${req.baseUrl}/${req.params.id}`))
+        .catch(() => res.status(500).render(USER_FORM_VIEW));
+    },
+  ],
+
+  postDelete: [
+    ...idValidators,
+    (req, res, next) => {
+      if (!req.user || req.user.user_id !== Number(req.params.id)) {
+        return next('route');
+      }
+      req.logout((error) => {
+        if (error) {
+          return handleLogoutError(error, next);
+        }
+        db.deleteRowsByWhereClause('users', ['user_id'], [req.params.id])
+          .then(() => res.redirect('/'))
+          .catch(next);
+      });
     },
   ],
 };

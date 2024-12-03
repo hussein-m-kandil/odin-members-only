@@ -37,11 +37,16 @@
         <h2 class="mb-3 text-center">Posts</h2>
       <% } %>
       <% if (Array.isArray(locals.posts) && posts.length > 0) { %>
-        <% if (!locals.user) { %>
-          <div class="small text-muted text-center my-2">
-            You won't be able to see the post's metadata until you log in!
-          </div>
-        <% } %>
+        <div class="small text-muted text-center mt-2 mb-4">
+          <% if (!locals.user) { %>
+            Note: You won't be able to see the post's metadata until you log in!
+          <% } else { %>
+            Note: I created this app solely to practice back-end web development.
+            Hence, to prevent the database from being bloated,
+            I implemented restrictions on the number of accounts/posts allowed,
+            ensuring older ones are automatically deleted.
+          <% } %>
+        </div>
         <% posts.forEach(({ username, fullname, user_id,post_id, post_title, post_body, created_at, updated_at }) => { %>
           <div class="card mb-4">
             <div class="card-body">

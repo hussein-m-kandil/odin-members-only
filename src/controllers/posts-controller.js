@@ -105,7 +105,11 @@ module.exports = {
         ['user_id', 'post_title', 'post_body'],
         [req.user.user_id, req.body.post_title, req.body.post_body]
       )
-        .then(() => res.redirect(`/user/${req.user.user_id}`))
+        .then(() => {
+          db.keepDBTableShort('posts', 'post_id', 200)
+            .catch((e) => console.log(e))
+            .finally(() => res.redirect(`/user/${req.user.user_id}`));
+        })
         .catch(() => next(new AppGenericError(COULD_NOT_CREATE, 500)));
     },
   ],

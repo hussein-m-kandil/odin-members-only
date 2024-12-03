@@ -36,6 +36,28 @@ const queryDBCatchError = async (query) => {
 };
 
 /**
+ * Keeps a table with the given name at a fixed maximum length.
+ * If `maxLength` omitted it defaults to 100.
+ *
+ * @param {string} table - Table's name
+ * @param {string} idCol - A column name for deleting where clause
+ * @param {number?} maxLen - The maximum allowed table length
+ */
+const keepDBTableShort = async (table, idCol, maxLen = 100) => {
+  const rows = await readAllRows(table);
+  const diff = rows.length - maxLen;
+  if (diff > 0) {
+    const extraRowsFromFirst = rows.slice(0, diff);
+    for (let i = 0; i < extraRowsFromFirst.length; i++) {
+      const extraRow = extraRowsFromFirst[i];
+      const clauseKeys = [idCol];
+      const clauseValues = [extraRow[idCol]];
+      await deleteRowsByWhereClause(table, clauseKeys, clauseValues);
+    }
+  }
+};
+
+/**
  * @param {string} table
  * @param {string | string[] | null} columns
  * @param {any | any[] | null} values
@@ -190,6 +212,7 @@ module.exports = {
   readPosts,
   createRow,
   readAllRows,
+  keepDBTableShort,
   readRowByWhereClause,
   readAllRowsByWhereClause,
   updateRowsByWhereClause,

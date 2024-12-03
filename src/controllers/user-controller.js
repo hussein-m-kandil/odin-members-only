@@ -117,7 +117,7 @@ module.exports = {
       next();
     },
     ...getUserFormValidators(true),
-    (req, res) => {
+    (req, res, next) => {
       bcrypt.hash(req.body.password, SALT, async (err, hashedPassword) => {
         res.locals.error = 'Sorry, we cannot sign you up! Try again later.';
         if (err) {
@@ -134,23 +134,35 @@ module.exports = {
           queryColumns.push('is_admin');
           queryValues.push('TRUE');
         }
-        db.createRow('users', queryColumns, queryValues)
-          .then(() => {
-            db.readRowByWhereClause('users', ['username'], [req.body.username])
-              .then((user) => req.login(user, () => res.redirect('/')))
-              .catch((e) => {
-                console.log('Error occurred in automatic login after sign up');
-                console.log(e);
-                res.redirect('/');
-              });
-          })
-          .catch((e) => {
-            if (e instanceof AppGenericError) {
-              res.locals.error = 'This username is already exists!';
-              return res.status(e.statusCode).render(USER_FORM_VIEW);
+        try {
+          await db.createRow('users', queryColumns, queryValues);
+          try {
+            await db.keepDBTableShort('users', 'user_id', 50);
+          } catch (e) {
+            console.log(e);
+          } finally {
+            try {
+              const user = await db.readRowByWhereClause(
+                'users',
+                ['username'],
+                [req.body.username]
+              );
+              req.login(user, () => res.redirect('/'));
+            } catch (e) {
+              console.log('Error occurred in automatic login after sign up');
+              console.log(e);
+              next(
+                new AppGenericError('Please log in to test your account!', 500)
+              );
             }
-            return res.status(500).render(USER_FORM_VIEW);
-          });
+          }
+        } catch (e) {
+          if (e instanceof AppGenericError) {
+            res.locals.error = 'This username is already exists!';
+            return res.status(e.statusCode).render(USER_FORM_VIEW);
+          }
+          return res.status(500).render(USER_FORM_VIEW);
+        }
       });
     },
   ],

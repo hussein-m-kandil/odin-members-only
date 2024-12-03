@@ -34,78 +34,84 @@
         <% } %>
         </h2>
       <% } else { %>
-        <h2 class="mb-4 text-center">Posts</h2>
+        <h2 class="mb-3 text-center">Posts</h2>
       <% } %>
       <% if (Array.isArray(locals.posts) && posts.length > 0) { %>
-      <% posts.forEach(({ username, fullname, user_id,post_id, post_title, post_body, created_at, updated_at }) => { %>
-      <div class="card mb-4">
-        <div class="card-body">
-          <div class="card-title border-bottom pb-2 mb-3 d-flex flex-wrap justify-content-between">
-            <h3 class="fs-5 m-0 lh-base">
-              <cite class="source-title">
-                <a style="text-decoration: none; color: inherit; font: inherit" href="/posts/<%= post_id %>">
-                  <%= post_title %>
-                </a>
-              </cite>
-            </h3>
-            <% if (locals.user) { %>
-              <% if (user.user_id === user_id) { %>
-                <%- include('partials/update-delete-form', {
-                  updateUrl: `/posts/update/${post_id}`,
-                  deleteUrl: `/posts/delete/${post_id}`,
-                  itemName: `${post_title}`
-                }) %>
-              <% } else if (user.is_admin) { %>
-                <%- include('partials/update-delete-form', {
-                  deleteUrl: `/posts/delete/${post_id}`,
-                  itemName: `${post_title}`
-                }) %>
-              <% } %>
-            <% } %>
-          </div>
-          <figure class="mb-0">
-            <blockquote class="blockquote" <%- locals.user && 'style="min-height: 4rem"' %>>
-              <% if (locals.fullPost || post_body.length <= 80) { %>
-                <pre
-                  class="card-text"
-                  style="overflow-wrap: break-word; white-space: pre-wrap; font: inherit; font-size: 1rem;"
-                ><%= post_body %></pre>
-              <% } else { %>
-                <p class="card-text">
-                  <%= post_body.slice(0, 80) %><a
-                    class="link-secondary link-offset-1 link-underline-opacity-25 link-underline-opacity-100-hover fs-6"
-                    href="/posts/<%= post_id %>"
-                    >...See more</a>
-                </p>
-              <% } %>
-            </blockquote>
-            <% if (locals.user) { %>
-              <figcaption class="blockquote-footer mt-4 mb-2">
-                <%= fullname %>
-              </figcaption>
-            <% } %>
-          </figure>
-        </div>
-        <% if (locals.user) { %>
-          <div class="card-footer d-flex flex-wrap justify-content-between">
-            <small class="text-body-secondary fst-italic">
-              <a
-                class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
-                href="/user/<%= user_id %>"
-                ><%= username %></a
-              >
-            </small>
-            <small class="text-body-secondary">
-              <%= isSameSecond(created_at,
-              updated_at)||isSameMinute(created_at,updated_at) ?
-              `${humanizeDate(updated_at)} ago` : `Updated
-              ${humanizeDate(updated_at)} ago` %>
-            </small>
+        <% if (!locals.user) { %>
+          <div class="small text-muted text-center my-2">
+            You won't be able to see the post's metadata until you log in!
           </div>
         <% } %>
-      </div>
-      <%})%> <% } else { %>
-      <p class="lead text-center">There are no posts yet!</p>
+        <% posts.forEach(({ username, fullname, user_id,post_id, post_title, post_body, created_at, updated_at }) => { %>
+          <div class="card mb-4">
+            <div class="card-body">
+              <div class="card-title border-bottom pb-2 mb-3 d-flex flex-wrap justify-content-between">
+                <h3 class="fs-5 m-0 lh-base">
+                  <cite class="source-title">
+                    <a style="text-decoration: none; color: inherit; font: inherit" href="/posts/<%= post_id %>">
+                      <%= post_title %>
+                    </a>
+                  </cite>
+                </h3>
+                <% if (locals.user) { %>
+                  <% if (user.user_id === user_id) { %>
+                    <%- include('partials/update-delete-form', {
+                      updateUrl: `/posts/update/${post_id}`,
+                      deleteUrl: `/posts/delete/${post_id}`,
+                      itemName: `${post_title}`
+                    }) %>
+                  <% } else if (user.is_admin) { %>
+                    <%- include('partials/update-delete-form', {
+                      deleteUrl: `/posts/delete/${post_id}`,
+                      itemName: `${post_title}`
+                    }) %>
+                  <% } %>
+                <% } %>
+              </div>
+              <figure class="mb-0">
+                <blockquote class="blockquote" <%- locals.user && 'style="min-height: 4rem"' %>>
+                  <% if (locals.fullPost || post_body.length <= 80) { %>
+                    <pre
+                      class="card-text"
+                      style="overflow-wrap: break-word; white-space: pre-wrap; font: inherit; font-size: 1rem;"
+                    ><%= post_body %></pre>
+                  <% } else { %>
+                    <p class="card-text">
+                      <%= post_body.slice(0, 80) %><a
+                        class="link-secondary link-offset-1 link-underline-opacity-25 link-underline-opacity-100-hover fs-6"
+                        href="/posts/<%= post_id %>"
+                        >...See more</a>
+                    </p>
+                  <% } %>
+                </blockquote>
+                <% if (locals.user) { %>
+                  <figcaption class="blockquote-footer mt-4 mb-2">
+                    <%= fullname %>
+                  </figcaption>
+                <% } %>
+              </figure>
+            </div>
+            <% if (locals.user) { %>
+              <div class="card-footer d-flex flex-wrap justify-content-between">
+                <small class="text-body-secondary fst-italic">
+                  <a
+                    class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+                    href="/user/<%= user_id %>"
+                    ><%= username %></a
+                  >
+                </small>
+                <small class="text-body-secondary">
+                  <%= isSameSecond(created_at,
+                  updated_at)||isSameMinute(created_at,updated_at) ?
+                  `${humanizeDate(updated_at)} ago` : `Updated
+                  ${humanizeDate(updated_at)} ago` %>
+                </small>
+              </div>
+            <% } %>
+          </div>
+        <%})%>
+      <% } else { %>
+        <p class="lead text-center">There are no posts yet!</p>
       <%} %>
     </div>
   </body>

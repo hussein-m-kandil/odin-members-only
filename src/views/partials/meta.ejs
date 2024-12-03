@@ -9,8 +9,16 @@
     background-color: #eee;
   }
 
-  .form-control:focus {
-    border-color: var(--bs-secondary);
-    box-shadow: 0 0 0 0.25rem rgba(var(--bs-body-color-rgb), 0.2);
+  textarea:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  a:focus-visible,
+  textarea:focus,
+  button:focus,
+  input:focus,
+  a:focus {
+    outline: none;
+    border-color: var(--bs-secondary) !important;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-body-color-rgb), 0.2) !important;
   }
 </style>

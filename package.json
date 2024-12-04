@@ -2,12 +2,15 @@
   "name": "odin-members-only",
   "version": "1.0.0",
   "description": "An exclusive clubhouse where members' posts are anonymous to the public, built as part of The Odin Project's Node.js course.",
-  "main": "app.js",
+  "main": "api/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js",
-    "dev": "node --env-file=.env --watch app.js",
-    "lint": "eslint ."
+    "start": "node api/app.js",
+    "dev": "node --env-file=.env --watch api/app.js",
+    "lint": "eslint .",
+    "vercel:dev": "[ -f .env.vercel ] && export $(cat .env.vercel) && vercel dev --listen 3000",
+    "vercel:deploy": "vercel",
+    "vercel:production": "vercel --prod"
   },
   "repository": {
     "type": "git",
@@ -35,7 +38,8 @@
     "@eslint/js": "^9.15.0",
     "@stylistic/eslint-plugin-js": "^2.11.0",
     "eslint": "^9.15.0",
-    "globals": "^15.12.0"
+    "globals": "^15.12.0",
+    "vercel": "^39.1.2"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

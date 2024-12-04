@@ -6,7 +6,7 @@ const postsRouter = require('./src/routes/posts-router.js');
 const authenticate = require('./src/auth/authenticate.js');
 const AppGenericError = require('./src/errors/app-generic-error.js');
 
-const PUBLIC_DIR = path.join(__dirname, 'public');
+const PUBLIC_DIR = path.join(__dirname, '../public');
 const VIEWS_DIR = path.join(__dirname, 'src/views');
 
 const app = express();
@@ -48,6 +48,9 @@ const injectErrorFlashIntoResLocals = (req, res, next) => {
   }
   next();
 };
+
+// Need to trust proxy to save session cookies when deployed
+app.set('trust proxy', 1);
 
 authenticate(app);
 

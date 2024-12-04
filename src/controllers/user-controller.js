@@ -75,6 +75,10 @@ const handleLogoutError = (error, next) => {
   return next(appError);
 };
 
+const validateAuthentication = (req, res, next) => {
+  return req.isAuthenticated() ? next() : next('route');
+};
+
 module.exports = {
   getLogin: (req, res) => {
     res.render(USER_FORM_VIEW, { title: LOGIN_TITLE });
@@ -168,6 +172,7 @@ module.exports = {
   ],
 
   getUser: [
+    validateAuthentication,
     param('id').isInt({ min: 0 }),
     (req, res, next) => {
       return validationResult(req).isEmpty() ? next() : next('route');
@@ -203,6 +208,7 @@ module.exports = {
   ],
 
   getUpdate: [
+    validateAuthentication,
     ...idValidators,
     (req, res, next) => {
       if (!req.user || req.user.user_id !== Number(req.params.id)) {
@@ -221,6 +227,7 @@ module.exports = {
   ],
 
   postUpdate: [
+    validateAuthentication,
     ...idValidators,
     (req, res, next) => {
       res.locals.title = UPDATE_TITLE;
@@ -262,6 +269,7 @@ module.exports = {
   ],
 
   postDelete: [
+    validateAuthentication,
     ...idValidators,
     (req, res, next) => {
       if (

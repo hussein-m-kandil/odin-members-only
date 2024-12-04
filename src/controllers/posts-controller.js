@@ -50,6 +50,7 @@ const injectTitleIntoResLocals = (title) => {
 };
 
 const validatePostOwner = async (req, res, next) => {
+  if (!req.isAuthenticated()) return next('route');
   try {
     res.locals.post = await db.readRowByWhereClause(
       'posts',
@@ -69,8 +70,8 @@ module.exports = {
   getPost: [
     ...idValidators,
     (req, res, next) => {
-      const postId = Number(req.params.id);
-      db.readPosts('post_id', postId, 1)
+      if (!req.isAuthenticated()) return next('route');
+      db.readPosts('post_id', req.params.id, 1)
         .then(([post]) => {
           if (!post) return next('route');
           res.render('index', {
@@ -92,7 +93,8 @@ module.exports = {
       .catch(() => next(new AppGenericError(COULD_NOT_READ, 500)));
   },
 
-  getCreatePost: (req, res) => {
+  getCreatePost: (req, res, next) => {
+    if (!req.isAuthenticated()) return next('route');
     res.render(POST_FORM_VIEW, { title: ADD_POST_TITLE });
   },
 
@@ -100,6 +102,7 @@ module.exports = {
     injectTitleIntoResLocals(ADD_POST_TITLE),
     ...postFieldsValidators,
     (req, res, next) => {
+      if (!req.isAuthenticated()) return next('route');
       db.createRow(
         'posts',
         ['user_id', 'post_title', 'post_body'],

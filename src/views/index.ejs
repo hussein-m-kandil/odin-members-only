@@ -53,9 +53,13 @@
               <div class="card-title border-bottom pb-2 mb-3 d-flex flex-wrap justify-content-between">
                 <h3 class="fs-5 m-0 lh-base">
                   <cite class="source-title">
-                    <a style="text-decoration: none; color: inherit; font: inherit" href="/posts/<%= post_id %>">
+                    <% if (locals.user) { %>
+                      <a style="text-decoration: none; color: inherit; font: inherit" href="/posts/<%= post_id %>">
+                        <%= post_title %>
+                      </a>
+                    <% } else { %>
                       <%= post_title %>
-                    </a>
+                    <%} %>
                   </cite>
                 </h3>
                 <% if (locals.user) { %>
